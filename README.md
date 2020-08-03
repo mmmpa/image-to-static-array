@@ -1,6 +1,6 @@
-# image_to_vec_static
+# image_to_static_vec
 
-This create rs file that defines static Vec<u8> by lazy_static for mono image data.
+This creates rs file that defines static Vec<u8> by lazy_static for mono image data.
 
 # Usage
 

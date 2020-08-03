@@ -1,17 +1,21 @@
+mod to_mono;
+mod to_u32;
+mod to_u8;
+
 use image::DynamicImage;
-use image::GenericImageView;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 struct ReadInformationSource {
     img_path: String,
+    prefix: String,
     rs_name: String,
     height: usize,
     x_list: Vec<usize>,
     labels: Vec<String>,
 }
 
-struct ReadInformation {
+pub struct ReadInformation {
     img: DynamicImage,
     rests: Vec<Rect>,
     labels: Vec<String>,
@@ -50,7 +54,7 @@ impl From<ReadInformationSource> for ReadInformation {
 }
 
 #[derive(Debug)]
-struct Rect {
+pub struct Rect {
     x: usize,
     y: usize,
     width: usize,
@@ -60,72 +64,57 @@ struct Rect {
 fn main() {
     let args = std::env::args().into_iter().collect::<Vec<_>>();
     let file = args.get(1).expect("need file path");
+    let mode = match args.get(2) {
+        None => "mono".to_string(),
+        Some(n) => n.to_string(),
+    };
     let json = std::fs::read(file).unwrap();
     let src: ReadInformationSource = serde_json::from_slice(&json).unwrap();
-    let rs_name = src.rs_name.clone();
+    let prefix = src.prefix.clone();
 
-    let result = to_detail(src.into());
+    let t = if mode == "mono" {
+        to_mono::to_vec(src.into()).into_iter().fold(
+            "".to_string(),
+            |a, (label, width, height, data)| {
+                a + &format!(
+                    "    pub static ref {}_{}: (usize, usize, Vec<u8>) = ({}, {}, vec!{:?});\n",
+                    prefix.to_uppercase(),
+                    label.to_uppercase(),
+                    width,
+                    height,
+                    data
+                )
+            },
+        )
+    } else if mode == "8" {
+        to_u8::to_vec(src.into()).into_iter().fold(
+            "".to_string(),
+            |a, (label, width, height, data)| {
+                a + &format!(
+                    "    pub static ref {}_{}: (usize, usize, Vec<u32>) = ({}, {}, vec!{:?});\n",
+                    prefix.to_uppercase(),
+                    label.to_uppercase(),
+                    width,
+                    height,
+                    data
+                )
+            },
+        )
+    } else {
+        to_u32::to_vec(src.into()).into_iter().fold(
+            "".to_string(),
+            |a, (label, width, height, data)| {
+                a + &format!(
+                    "    pub static ref {}_{}: (usize, usize, Vec<u32>) = ({}, {}, vec!{:?});\n",
+                    prefix.to_uppercase(),
+                    label.to_uppercase(),
+                    width,
+                    height,
+                    data
+                )
+            },
+        )
+    };
 
-    let mut t = "".to_string();
-    for (label, width, height, data) in result {
-        t += &format!(
-            "    pub static ref VEC_{}: (usize, usize, Vec<u8>) = ({}, {}, vec!{:?});\n",
-            label.to_uppercase(),
-            width,
-            height,
-            data
-        );
-    }
-
-    let whole = format!("lazy_static! {{\n{}}}\n", t);
-    println!("{}", whole);
-
-    std::fs::write(format!("./tmp/{}.rs", rs_name), whole).unwrap();
-}
-
-fn to_detail(target: ReadInformation) -> Vec<(String, usize, usize, Vec<usize>)> {
-    let mut result = vec![];
-
-    for (rect, label) in target.rests.into_iter().zip(target.labels) {
-        let Rect {
-            x, width, height, ..
-        } = rect;
-
-        let mut px_vec = vec![];
-
-        for y in 0..height {
-            for step_x in 0..width {
-                let px = target.img.get_pixel((x + step_x) as u32, y as u32).0;
-                let not_white = px.iter().fold(false, |a, n| a || *n != 255);
-
-                if not_white {
-                    px_vec.push(1);
-                } else {
-                    px_vec.push(0);
-                }
-            }
-        }
-
-        printer(width, px_vec.as_ref());
-
-        result.push((label, width, height, px_vec));
-    }
-
-    result
-}
-
-fn printer(w: usize, v: &[usize]) {
-    let t = v
-        .chunks(w)
-        .into_iter()
-        .map(|row| {
-            row.into_iter()
-                .map(|n| if *n == 1 { "+" } else { " " })
-                .collect::<Vec<_>>()
-                .join("")
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-
-    println!("---\n{}\n---\n", t);
+    println!("{}", format!("lazy_static! {{\n{}}}\n", t));
 }

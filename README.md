@@ -7,7 +7,7 @@ This create rs file that defines static Vec<u8> by lazy_static for mono image da
 ## Command
 
 ```
-cargo run "./tmp/nums.json" > "./tmp/mono.rs"
+cargo run "./tmp/nums.json" > "./tmp/vec_mono.rs"
 ```
 
 ```rs
@@ -22,21 +22,14 @@ lazy_static! {
 ## Command for u8
 
 ```
-cargo run "./tmp/nums.json" 32 > "./tmp/u32.rs"
+cargo run "./tmp/nums.json" 32 > "./tmp/vec_u8.rs"
 ```
 
 ```rs
 lazy_static! {
     pub static ref VEC_NUM_1: (usize, usize, Vec<u32>) = (3, 10, vec![0, 44, 151, 0]);
     pub static ref VEC_NUM_2: (usize, usize, Vec<u32>) = (5, 10, vec![0, 0, 232, 136, 159, 0, 0]);
-    pub static ref VEC_NUM_3: (usize, usize, Vec<u32>) = (5, 10, vec![0, 0, 232, 132, 193, 139, 128]);
-    pub static ref VEC_NUM_4: (usize, usize, Vec<u32>) = (5, 10, vec![0, 0, 35, 42, 95, 16, 128]);
-    pub static ref VEC_NUM_5: (usize, usize, Vec<u32>) = (5, 10, vec![0, 0, 244, 56, 33, 139, 128]);
-    pub static ref VEC_NUM_6: (usize, usize, Vec<u32>) = (5, 10, vec![34, 33, 232, 198, 46, 0, 0]);
-    pub static ref VEC_NUM_7: (usize, usize, Vec<u32>) = (5, 10, vec![0, 1, 248, 200, 68, 33, 0]);
-    pub static ref VEC_NUM_8: (usize, usize, Vec<u32>) = (5, 10, vec![116, 98, 232, 198, 46, 0, 0]);
-    pub static ref VEC_NUM_9: (usize, usize, Vec<u32>) = (5, 10, vec![0, 0, 232, 197, 225, 17, 0]);
-    pub static ref VEC_NUM_0: (usize, usize, Vec<u32>) = (5, 10, vec![0, 0, 232, 198, 46, 0, 0]);
+    // snip
     pub static ref VEC_NUM_PERIOD: (usize, usize, Vec<u32>) = (2, 10, vec![0, 15, 0]);
 }
 ```

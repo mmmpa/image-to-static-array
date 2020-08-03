@@ -22,7 +22,7 @@ lazy_static! {
 ## Command for u8
 
 ```
-cargo run "./tmp/nums.json" 32 > "./tmp/vec_u8.rs"
+cargo run "./tmp/nums.json" 8 > "./tmp/vec_u8.rs"
 ```
 
 ```rust

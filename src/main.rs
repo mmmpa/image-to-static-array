@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 struct ReadInformationSource {
     img_path: String,
     prefix: String,
-    rs_name: String,
     height: usize,
     x_list: Vec<usize>,
     labels: Vec<String>,
